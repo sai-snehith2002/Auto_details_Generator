@@ -1,0 +1,25 @@
+# Environment & secrets
+.env
+.env.*
+!.env.example
+job_filler_env/
+venv/
+.venv/
+__pycache__/
+*.pyc
+*.pyo
+
+# Personal data & local vector store
+data/profile.json
+data/vectorstore/
+data/*.json
+!data/profile.example.json
+
+# IDE
+.vscode/
+.idea/
+*.swp
+
+# OS
+.DS_Store
+Thumbs.db

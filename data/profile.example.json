@@ -1,0 +1,33 @@
+{
+  "personal_info": {
+    "full_name": "",
+    "email": "",
+    "phone": "",
+    "linkedin_url": "",
+    "github_url": "",
+    "portfolio_url": "",
+    "location": ""
+  },
+  "compensation": {
+    "current_ctc": "",
+    "expected_ctc": "",
+    "notice_period": "",
+    "years_of_experience": ""
+  },
+  "summary": "",
+  "education": [],
+  "work_experience": [],
+  "skills": {
+    "programming_languages": [],
+    "frameworks_and_libraries": [],
+    "databases": [],
+    "cloud_and_devops": [],
+    "ai_ml": [],
+    "tools": [],
+    "soft_skills": []
+  },
+  "projects": [],
+  "publications": [],
+  "certifications": [],
+  "achievements_and_awards": []
+}

@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+{% block title %}{{ agent.agent_name }} — JobCraft AI{% endblock %}
+
+{% block content %}
+<h1>{{ agent.agent_name }}</h1>
+<p class="subtitle">{{ agent.agent_description }}</p>
+
+<form method="POST">
+  <div class="form-grid">
+    <div class="form-group">
+      <label for="recipient_name">Recipient Name</label>
+      <input type="text" id="recipient_name" name="recipient_name" required
+        value="{{ inputs.get('recipient_name', '') }}">
+    </div>
+    <div class="form-group">
+      <label for="company_name">Company Name</label>
+      <input type="text" id="company_name" name="company_name" required
+        value="{{ inputs.get('company_name', '') }}">
+    </div>
+    <div class="form-group full-width">
+      <label for="job_title">Job Title</label>
+      <input type="text" id="job_title" name="job_title" required
+        value="{{ inputs.get('job_title', '') }}">
+    </div>
+    <div class="form-group full-width">
+      <label for="job_description">Job Description</label>
+      <textarea id="job_description" name="job_description" rows="8" required
+        placeholder="Paste the full job description here.">{{ inputs.get('job_description', '') }}</textarea>
+    </div>
+  </div>
+  <div class="btn-group">
+    <button type="submit" name="action" value="generate" class="btn">Generate Email</button>
+  </div>
+</form>
+{% endblock %}

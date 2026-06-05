@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+{% block title %}{{ agent.agent_name }} — JobCraft AI{% endblock %}
+
+{% block content %}
+<h1>{{ agent.agent_name }}</h1>
+<p class="subtitle">{{ agent.agent_description }}</p>
+
+<form method="POST">
+  <div class="form-grid">
+    <div class="form-group">
+      <label for="contact_name">Contact Name</label>
+      <input type="text" id="contact_name" name="contact_name" required
+        value="{{ inputs.get('contact_name', '') }}">
+    </div>
+    <div class="form-group">
+      <label for="contact_role">Contact Role at Company</label>
+      <input type="text" id="contact_role" name="contact_role" required
+        value="{{ inputs.get('contact_role', '') }}">
+    </div>
+    <div class="form-group">
+      <label for="company_name">Company Name</label>
+      <input type="text" id="company_name" name="company_name" required
+        value="{{ inputs.get('company_name', '') }}">
+    </div>
+    <div class="form-group">
+      <label for="job_title">Job Title Applying For</label>
+      <input type="text" id="job_title" name="job_title" required
+        value="{{ inputs.get('job_title', '') }}">
+    </div>
+    <div class="form-group full-width">
+      <label for="job_link">Job Link (optional)</label>
+      <input type="url" id="job_link" name="job_link"
+        value="{{ inputs.get('job_link', '') }}">
+    </div>
+    <div class="form-group full-width">
+      <label for="job_description">Job Description (optional but recommended)</label>
+      <textarea id="job_description" name="job_description" rows="8"
+        placeholder="Paste the job description so the email is tailored to the role requirements.">{{ inputs.get('job_description', '') }}</textarea>
+    </div>
+    <div class="form-group full-width">
+      <label for="relationship">Relationship / How You Know Them</label>
+      <textarea id="relationship" name="relationship" rows="3" required
+        placeholder="e.g. Former colleague at XYZ, met at a conference...">{{ inputs.get('relationship', '') }}</textarea>
+    </div>
+  </div>
+  <div class="btn-group">
+    <button type="submit" name="action" value="generate" class="btn">Generate Email</button>
+  </div>
+</form>
+{% endblock %}

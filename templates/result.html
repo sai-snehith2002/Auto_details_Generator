@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+{% block title %}Result — {{ agent.agent_name }}{% endblock %}
+
+{% block content %}
+<h1>{{ agent.agent_name }}</h1>
+<p class="subtitle">Generated output — refine until you're happy, then copy.</p>
+
+<div class="output-box" id="output">{{ output }}</div>
+
+<div class="btn-group">
+  <button type="button" class="btn btn-secondary" onclick="copyOutput()">Copy to Clipboard</button>
+  <a href="{{ back_url }}" class="btn btn-secondary">Start Over</a>
+</div>
+
+<div class="refine-section">
+  <h2>Refine Output</h2>
+  <form method="POST">
+    {% for key, val in inputs.items() %}
+      <input type="hidden" name="{{ key }}" value="{{ val }}">
+    {% endfor %}
+    <div class="form-group">
+      <label for="refine_feedback">What should change?</label>
+      <textarea id="refine_feedback" name="refine_feedback" rows="4" required
+        placeholder="e.g. Make it shorter, add more technical detail, tone down the formality..."></textarea>
+    </div>
+    <div class="btn-group">
+      <button type="submit" name="action" value="refine" class="btn">Refine</button>
+    </div>
+  </form>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+function copyOutput() {
+  const text = document.getElementById('output').innerText;
+  navigator.clipboard.writeText(text).then(() => {
+    alert('Copied to clipboard!');
+  });
+}
+</script>
+{% endblock %}

@@ -1,0 +1,239 @@
+{% extends "base.html" %}
+{% block title %}Profile — JobCraft AI{% endblock %}
+
+{% block content %}
+<h1>Profile Manager</h1>
+<p class="subtitle">
+  Your professional profile is the ground truth for all agents.
+  {% if is_populated %}
+    <span class="badge badge-ok">Profile saved</span>
+  {% else %}
+    <span class="badge badge-warn">Not yet populated</span>
+  {% endif %}
+</p>
+
+<form method="POST" id="profile-form">
+  <h2>Personal Info</h2>
+  <div class="form-grid">
+    <div class="form-group">
+      <label for="full_name">Full Name</label>
+      <input type="text" id="full_name" name="full_name" value="{{ profile.personal_info.full_name }}">
+    </div>
+    <div class="form-group">
+      <label for="email">Email</label>
+      <input type="email" id="email" name="email" value="{{ profile.personal_info.email }}">
+    </div>
+    <div class="form-group">
+      <label for="phone">Phone</label>
+      <input type="text" id="phone" name="phone" value="{{ profile.personal_info.phone }}">
+    </div>
+    <div class="form-group">
+      <label for="location">Location</label>
+      <input type="text" id="location" name="location" value="{{ profile.personal_info.location }}">
+    </div>
+    <div class="form-group">
+      <label for="linkedin_url">LinkedIn URL</label>
+      <input type="url" id="linkedin_url" name="linkedin_url" value="{{ profile.personal_info.linkedin_url }}">
+    </div>
+    <div class="form-group">
+      <label for="github_url">GitHub URL</label>
+      <input type="url" id="github_url" name="github_url" value="{{ profile.personal_info.github_url }}">
+    </div>
+    <div class="form-group full-width">
+      <label for="portfolio_url">Portfolio URL</label>
+      <input type="url" id="portfolio_url" name="portfolio_url" value="{{ profile.personal_info.portfolio_url }}">
+    </div>
+  </div>
+
+  <h2>Compensation</h2>
+  <div class="form-grid">
+    <div class="form-group">
+      <label for="current_ctc">Current CTC</label>
+      <input type="text" id="current_ctc" name="current_ctc" value="{{ profile.compensation.current_ctc }}">
+    </div>
+    <div class="form-group">
+      <label for="expected_ctc">Expected CTC</label>
+      <input type="text" id="expected_ctc" name="expected_ctc" value="{{ profile.compensation.expected_ctc }}">
+    </div>
+    <div class="form-group">
+      <label for="notice_period">Notice Period</label>
+      <input type="text" id="notice_period" name="notice_period" value="{{ profile.compensation.notice_period }}">
+    </div>
+    <div class="form-group">
+      <label for="years_of_experience">Years of Experience</label>
+      <input type="text" id="years_of_experience" name="years_of_experience" value="{{ profile.compensation.years_of_experience }}">
+    </div>
+  </div>
+
+  <h2>Summary</h2>
+  <div class="form-group">
+    <label for="summary">Professional Summary</label>
+    <textarea id="summary" name="summary" rows="4">{{ profile.summary }}</textarea>
+  </div>
+
+  <h2>Skills <small style="color:var(--muted)">(one per line)</small></h2>
+  <div class="form-grid">
+    <div class="form-group">
+      <label for="programming_languages">Programming Languages</label>
+      <textarea id="programming_languages" name="programming_languages" rows="4">{{ profile.skills.programming_languages | join('\n') }}</textarea>
+    </div>
+    <div class="form-group">
+      <label for="frameworks_and_libraries">Frameworks & Libraries</label>
+      <textarea id="frameworks_and_libraries" name="frameworks_and_libraries" rows="4">{{ profile.skills.frameworks_and_libraries | join('\n') }}</textarea>
+    </div>
+    <div class="form-group">
+      <label for="databases">Databases</label>
+      <textarea id="databases" name="databases" rows="3">{{ profile.skills.databases | join('\n') }}</textarea>
+    </div>
+    <div class="form-group">
+      <label for="cloud_and_devops">Cloud & DevOps</label>
+      <textarea id="cloud_and_devops" name="cloud_and_devops" rows="3">{{ profile.skills.cloud_and_devops | join('\n') }}</textarea>
+    </div>
+    <div class="form-group">
+      <label for="ai_ml">AI / ML</label>
+      <textarea id="ai_ml" name="ai_ml" rows="3">{{ profile.skills.ai_ml | join('\n') }}</textarea>
+    </div>
+    <div class="form-group">
+      <label for="tools">Tools</label>
+      <textarea id="tools" name="tools" rows="3">{{ profile.skills.tools | join('\n') }}</textarea>
+    </div>
+    <div class="form-group full-width">
+      <label for="soft_skills">Soft Skills</label>
+      <textarea id="soft_skills" name="soft_skills" rows="3">{{ profile.skills.soft_skills | join('\n') }}</textarea>
+    </div>
+  </div>
+
+  <h2>Education</h2>
+  <div id="education-list" class="list-editor"></div>
+  <button type="button" class="btn-add" onclick="addEducation()">+ Add Education</button>
+  <input type="hidden" name="education_json" id="education_json">
+
+  <h2>Work Experience</h2>
+  <div id="work-list" class="list-editor"></div>
+  <button type="button" class="btn-add" onclick="addWork()">+ Add Work Experience</button>
+  <input type="hidden" name="work_experience_json" id="work_experience_json">
+
+  <h2>Projects</h2>
+  <div id="projects-list" class="list-editor"></div>
+  <button type="button" class="btn-add" onclick="addProject()">+ Add Project</button>
+  <input type="hidden" name="projects_json" id="projects_json">
+
+  <h2>Publications</h2>
+  <div id="publications-list" class="list-editor"></div>
+  <button type="button" class="btn-add" onclick="addPublication()">+ Add Publication</button>
+  <input type="hidden" name="publications_json" id="publications_json">
+
+  <h2>Certifications</h2>
+  <div id="certifications-list" class="list-editor"></div>
+  <button type="button" class="btn-add" onclick="addCertification()">+ Add Certification</button>
+  <input type="hidden" name="certifications_json" id="certifications_json">
+
+  <h2>Achievements & Awards <small style="color:var(--muted)">(one per line)</small></h2>
+  <div class="form-group">
+    <textarea id="achievements_and_awards" name="achievements_and_awards" rows="4">{{ profile.achievements_and_awards | join('\n') }}</textarea>
+  </div>
+
+  <div class="btn-group">
+    <button type="submit" class="btn">Save & Re-index Profile</button>
+  </div>
+</form>
+{% endblock %}
+
+{% block scripts %}
+<script>
+const profileData = {{ profile_json | safe }};
+
+function linesToList(text) {
+  return text.split('\n').map(s => s.trim()).filter(Boolean);
+}
+
+function makeItem(containerId, fields, data, removeFn) {
+  const container = document.getElementById(containerId);
+  const idx = container.children.length;
+  const div = document.createElement('div');
+  div.className = 'list-item';
+  div.dataset.idx = idx;
+
+  let html = `<div class="list-item-header"><span>Entry ${idx + 1}</span>
+    <button type="button" class="btn-remove" onclick="${removeFn}(this)">Remove</button></div>`;
+  fields.forEach(f => {
+    const val = (data && data[f.key]) ? (Array.isArray(data[f.key]) ? data[f.key].join('\n') : data[f.key]) : '';
+    const rows = f.rows || 2;
+    html += `<div class="form-group"><label>${f.label}</label>
+      <${f.type || 'input'} ${f.type === 'textarea' ? `rows="${rows}"` : 'type="text"'}
+        data-field="${f.key}" ${f.type === 'textarea' ? '' : 'value="' + val.replace(/"/g, '&quot;') + '"'}
+      >${f.type === 'textarea' ? val : ''}</${f.type || 'input'}></div>`;
+  });
+  div.innerHTML = html;
+  container.appendChild(div);
+}
+
+function collectItems(containerId, fields) {
+  const items = [];
+  document.querySelectorAll(`#${containerId} .list-item`).forEach(item => {
+    const obj = {};
+    fields.forEach(f => {
+      const el = item.querySelector(`[data-field="${f.key}"]`);
+      if (!el) return;
+      obj[f.key] = f.list ? linesToList(el.value) : el.value;
+    });
+    items.push(obj);
+  });
+  return items;
+}
+
+const eduFields = [
+  {key:'degree', label:'Degree'}, {key:'major', label:'Major'},
+  {key:'institution', label:'Institution'}, {key:'year_of_graduation', label:'Year'},
+  {key:'cgpa_or_percentage', label:'CGPA / Percentage'},
+  {key:'relevant_coursework', label:'Relevant Coursework (one per line)', type:'textarea', rows:3, list:true}
+];
+const workFields = [
+  {key:'company', label:'Company'}, {key:'role', label:'Role'}, {key:'duration', label:'Duration'},
+  {key:'responsibilities', label:'Responsibilities (one per line)', type:'textarea', rows:3, list:true},
+  {key:'tech_used', label:'Technologies (one per line)', type:'textarea', rows:2, list:true},
+  {key:'achievements', label:'Achievements (one per line)', type:'textarea', rows:3, list:true}
+];
+const projFields = [
+  {key:'name', label:'Name'}, {key:'description', label:'Description', type:'textarea', rows:3},
+  {key:'tech_stack', label:'Tech Stack (one per line)', type:'textarea', rows:2, list:true},
+  {key:'github_url', label:'GitHub URL'},
+  {key:'highlights', label:'Highlights (one per line)', type:'textarea', rows:3, list:true}
+];
+const pubFields = [
+  {key:'title', label:'Title'}, {key:'venue', label:'Venue'},
+  {key:'year', label:'Year'}, {key:'description', label:'Description', type:'textarea', rows:2},
+  {key:'url', label:'URL (DOI / link)'}
+];
+const certFields = [
+  {key:'name', label:'Name'}, {key:'issuer', label:'Issuer'}, {key:'year', label:'Year'},
+  {key:'url', label:'Credential URL'}
+];
+
+function addEducation(d) { makeItem('education-list', eduFields, d, 'removeEducation'); }
+function addWork(d) { makeItem('work-list', workFields, d, 'removeWork'); }
+function addProject(d) { makeItem('projects-list', projFields, d, 'removeProject'); }
+function addPublication(d) { makeItem('publications-list', pubFields, d, 'removePublication'); }
+function addCertification(d) { makeItem('certifications-list', certFields, d, 'removeCertification'); }
+
+function removeEducation(btn) { btn.closest('.list-item').remove(); }
+function removeWork(btn) { btn.closest('.list-item').remove(); }
+function removeProject(btn) { btn.closest('.list-item').remove(); }
+function removePublication(btn) { btn.closest('.list-item').remove(); }
+function removeCertification(btn) { btn.closest('.list-item').remove(); }
+
+(profileData.education || []).forEach(addEducation);
+(profileData.work_experience || []).forEach(addWork);
+(profileData.projects || []).forEach(addProject);
+(profileData.publications || []).forEach(addPublication);
+(profileData.certifications || []).forEach(addCertification);
+
+document.getElementById('profile-form').addEventListener('submit', function() {
+  document.getElementById('education_json').value = JSON.stringify(collectItems('education-list', eduFields));
+  document.getElementById('work_experience_json').value = JSON.stringify(collectItems('work-list', workFields));
+  document.getElementById('projects_json').value = JSON.stringify(collectItems('projects-list', projFields));
+  document.getElementById('publications_json').value = JSON.stringify(collectItems('publications-list', pubFields));
+  document.getElementById('certifications_json').value = JSON.stringify(collectItems('certifications-list', certFields));
+});
+</script>
+{% endblock %}

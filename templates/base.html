@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block title %}JobCraft AI{% endblock %}</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+
+  <!-- Mobile top bar (hidden on desktop via CSS) -->
+  <div class="mobile-topbar">
+    <div class="brand">JobCraft AI</div>
+    <button class="hamburger" onclick="openDrawer()" aria-label="Open menu">&#9776;</button>
+  </div>
+
+  <!-- Mobile drawer overlay -->
+  <div class="drawer-overlay" id="drawerOverlay" onclick="closeDrawer()"></div>
+
+  <!-- Mobile nav drawer -->
+  <nav class="mobile-drawer" id="mobileDrawer" aria-label="Mobile navigation">
+    <div class="drawer-close">
+      <div class="brand">JobCraft AI</div>
+      <button onclick="closeDrawer()" aria-label="Close menu">&times;</button>
+    </div>
+    <p class="tagline">Local RAG job application assistant</p>
+    <ul class="nav-links">
+      <li><a href="{{ url_for('profile_page') }}"
+        class="{% if request.endpoint == 'profile_page' %}active{% endif %}"
+        onclick="closeDrawer()">Profile</a></li>
+      {% for agent in nav_agents %}
+      <li>
+        <a href="{{ agent.route }}"
+          class="{% if request.path == agent.route %}active{% endif %}"
+          onclick="closeDrawer()">{{ agent.name }}</a>
+      </li>
+      {% endfor %}
+    </ul>
+  </nav>
+
+  <div class="layout">
+    <!-- Desktop sidebar -->
+    <nav class="sidebar" aria-label="Desktop navigation">
+      <div class="brand">JobCraft AI</div>
+      <p class="tagline">Local RAG job application assistant</p>
+      <ul class="nav-links">
+        <li><a href="{{ url_for('profile_page') }}"
+          class="{% if request.endpoint == 'profile_page' %}active{% endif %}">Profile</a></li>
+        {% for agent in nav_agents %}
+        <li>
+          <a href="{{ agent.route }}"
+            class="{% if request.path == agent.route %}active{% endif %}">
+            {{ agent.name }}
+          </a>
+        </li>
+        {% endfor %}
+      </ul>
+    </nav>
+
+    <main class="content">
+      {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+          {% for category, message in messages %}
+            <div class="flash flash-{{ category }}">{{ message }}</div>
+          {% endfor %}
+        {% endif %}
+      {% endwith %}
+      {% block content %}{% endblock %}
+    </main>
+  </div>
+
+  <script>
+    function openDrawer() {
+      document.getElementById('mobileDrawer').classList.add('open');
+      document.getElementById('drawerOverlay').classList.add('open');
+      document.body.style.overflow = 'hidden';
+    }
+    function closeDrawer() {
+      document.getElementById('mobileDrawer').classList.remove('open');
+      document.getElementById('drawerOverlay').classList.remove('open');
+      document.body.style.overflow = '';
+    }
+    // Close drawer on Escape key
+    document.addEventListener('keydown', function(e) {
+      if (e.key === 'Escape') closeDrawer();
+    });
+  </script>
+
+  {% block scripts %}{% endblock %}
+</body>
+</html>
