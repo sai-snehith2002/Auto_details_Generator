@@ -1,4 +1,5 @@
 import json
+import os
 
 from flask import Flask, flash, redirect, render_template, request, session, url_for
 
@@ -209,4 +210,5 @@ def inject_nav():
 
 
 if __name__ == "__main__":
-    app.run(debug=FLASK_DEBUG, port=5000)
+    port = int(os.environ.get("PORT", 7860))
+    app.run(debug=FLASK_DEBUG, host="0.0.0.0", port=port)
