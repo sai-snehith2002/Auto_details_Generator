@@ -1,3 +1,12 @@
+---
+title: JobCraft AI
+emoji: 💼
+colorFrom: blue
+colorTo: indigo
+sdk: docker
+pinned: false
+---
+
 # JobCraft AI
 
 A local Python web app that stores your professional profile and uses a multi-agent RAG architecture to generate tailored job application content — powered by Ollama.
