@@ -1,11 +1,16 @@
-from pathlib import Path
+"""
+embedder.py  –  Chunking, embedding, and indexing logic.
+
+All local-file dependency (index marker, VECTOR_STORE_PATH, PROFILE_PATH)
+has been removed.  The only persistent state lives in Qdrant Cloud.
+"""
 
 from sentence_transformers import SentenceTransformer
 
-from config import PROFILE_PATH, VECTOR_STORE_PATH
-
 _embed_model = SentenceTransformer("all-MiniLM-L6-v2")
 
+
+# ── Helpers ──────────────────────────────────────────────────────────────────
 
 def _format_compensation_value(key: str, value: str) -> str:
     """Format raw CTC numbers as LPA for clearer agent answers."""
@@ -21,6 +26,8 @@ def _format_compensation_value(key: str, value: str) -> str:
     return f"₹{amount:,} per annum"
 
 
+# ── Embedding ─────────────────────────────────────────────────────────────────
+
 def embed_texts(texts: list[str]) -> list[list[float]]:
     if not texts:
         return []
@@ -31,8 +38,10 @@ def embed_text(text: str) -> list[float]:
     return embed_texts([text])[0]
 
 
+# ── Chunking ──────────────────────────────────────────────────────────────────
+
 def chunk_profile(profile: dict) -> list[dict]:
-    """Split profile into semantic chunks for vector storage."""
+    """Split a profile dict into semantic chunks for vector storage."""
     chunks: list[dict] = []
 
     def add_chunk(chunk_id: str, section: str, text: str) -> None:
@@ -141,33 +150,25 @@ def chunk_profile(profile: dict) -> list[dict]:
     return chunks
 
 
-def _index_marker_path() -> Path:
-    return Path(VECTOR_STORE_PATH) / ".last_indexed"
-
-
-def profile_needs_reindex() -> bool:
-    profile_path = Path(PROFILE_PATH)
-    marker = _index_marker_path()
-    if not profile_path.exists():
-        return False
-    if not marker.exists():
-        return True
-    return profile_path.stat().st_mtime > marker.stat().st_mtime
-
+# ── Indexing ──────────────────────────────────────────────────────────────────
 
 def index_profile(profile: dict) -> int:
-    """Chunk, embed, and upsert profile into the vector store. Returns chunk count."""
-    from rag.vector_store import upsert_chunks
+    """Chunk, embed, and upsert the full profile into Qdrant.
+
+    Always does a full replace: deletes existing points first so stale
+    chunks from a previous (larger) profile don't linger.
+    Returns the number of chunks upserted.
+    """
+    from rag.vector_store import delete_all_chunks, upsert_chunks
 
     chunks = chunk_profile(profile)
     if not chunks:
         return 0
 
+    # Wipe old data so a re-index is always clean
+    delete_all_chunks()
+
     texts = [c["text"] for c in chunks]
     embeddings = embed_texts(texts)
     upsert_chunks(chunks, embeddings)
-
-    marker = _index_marker_path()
-    marker.parent.mkdir(parents=True, exist_ok=True)
-    marker.touch()
     return len(chunks)

@@ -10,9 +10,10 @@ ROUTE_ENDPOINTS = {
     "refmail": "agent_refmail",
     "jobemail": "agent_jobemail",
 }
+
 from config import FLASK_DEBUG, FLASK_SECRET_KEY
 from user_profile.profile_store import load_profile, profile_is_populated, save_profile
-from rag.embedder import index_profile, profile_needs_reindex
+from rag.embedder import index_profile
 
 app = Flask(__name__)
 app.secret_key = FLASK_SECRET_KEY
@@ -207,16 +208,5 @@ def inject_nav():
     }
 
 
-def _auto_reindex_if_stale() -> None:
-    if not profile_needs_reindex():
-        return
-    try:
-        count = index_profile(load_profile())
-        print(f"Profile auto-indexed ({count} chunks)")
-    except Exception as exc:
-        print(f"Profile auto-index skipped: {exc}")
-
-
 if __name__ == "__main__":
-    _auto_reindex_if_stale()
     app.run(debug=FLASK_DEBUG, port=5000)

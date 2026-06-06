@@ -6,6 +6,15 @@ from agents.email_prompts import (
     build_job_section,
 )
 
+ROLE_ALIGNMENT_RULES = """
+CONTEXT USAGE RULES (critical):
+- The RELEVANT PROFILE CONTEXT below has already been pre-filtered for this role.
+- Each chunk is tagged with a relevance score — prioritise higher-scored chunks.
+- ONLY reference experience, projects, and skills that directly match the JD requirements.
+- Discard any context chunk that belongs to a different domain than this role.
+- Never mention unrelated projects or technologies just because they exist in the profile.
+"""
+
 
 class ReferralEmailAgent(BaseAgent):
     agent_id = "refmail"
@@ -15,15 +24,14 @@ class ReferralEmailAgent(BaseAgent):
     def build_system_prompt(self) -> str:
         return EMAIL_SYSTEM_PROMPT
 
+    def build_retrieval_role(self, inputs: dict) -> str:
+        return inputs.get("job_title", "")
+
+    def build_retrieval_jd(self, inputs: dict) -> str:
+        return inputs.get("job_description", "")
+
     def build_retrieval_query(self, inputs: dict) -> str:
-        parts = [
-            inputs.get("job_title", ""),
-            inputs.get("company_name", ""),
-            inputs.get("job_description", ""),
-            inputs.get("contact_role", ""),
-            "referral work experience skills qualifications",
-        ]
-        return " ".join(p for p in parts if p)
+        return f"{inputs.get('job_title', '')} {inputs.get('company_name', '')}"
 
     def build_user_prompt(self, inputs: dict, context: str) -> str:
         identity = build_identity_section()
@@ -42,8 +50,8 @@ class ReferralEmailAgent(BaseAgent):
 
         prompt = (
             "Write a referral request email from the candidate to their contact.\n\n"
-            "The email MUST be specifically tailored to the job title and job description below. "
-            "Pick 2-3 qualifications from the profile that directly match what this role requires.\n\n"
+            "The email MUST be tailored to the exact job title and job description. "
+            "Pick 2-3 qualifications from the profile that directly match what THIS role requires.\n\n"
             "Requirements:\n"
             "- Professional, respectful tone — acknowledge their time\n"
             "- Open by referencing the exact job title at the exact company name\n"
@@ -51,15 +59,18 @@ class ReferralEmailAgent(BaseAgent):
             "- Make it easy for them to refer (mention resume is available)\n"
             "- Sign off with the candidate's real full name from CANDIDATE IDENTITY\n"
             "- Include Subject line referencing the exact job title and company\n\n"
+            f"{ROLE_ALIGNMENT_RULES}\n"
             f"{STRICT_OUTPUT_RULES}\n\n"
-            f"--- CANDIDATE IDENTITY (use for sign-off and contact details) ---\n{identity}\n\n"
-            f"--- JOB APPLICATION DETAILS (use exact values, do not replace with placeholders) ---\n"
-            f"{job_details}\n"
+            f"--- CANDIDATE IDENTITY ---\n{identity}\n\n"
+            f"--- JOB APPLICATION DETAILS ---\n{job_details}\n"
         )
         if job_desc:
-            prompt += f"\n--- JOB DESCRIPTION (tailor qualifications to these requirements) ---\n{job_desc}\n"
+            prompt += (
+                f"\n--- JOB DESCRIPTION (tailor qualifications to these requirements) ---\n"
+                f"{job_desc}\n"
+            )
         prompt += (
-            f"\n--- RELEVANT PROFILE CONTEXT (select only what matches this role) ---\n{context}\n\n"
+            f"\n--- RELEVANT PROFILE CONTEXT (pre-filtered for this role) ---\n{context}\n\n"
             "Format:\nSubject: [exact job title] at [exact company name]\n\n[Complete email body]"
         )
         return prompt
